@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
     val viewModel by lazy { MainViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        StrictMode.enableDefaults()
+//        StrictMode.enableDefaults()
 
         super.onCreate(savedInstanceState)
         setContent {

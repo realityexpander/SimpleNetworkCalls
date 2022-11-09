@@ -1,5 +1,6 @@
 package com.realityexpander.simplenetworkcalls
 
+import android.net.TrafficStats
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -80,6 +81,7 @@ class MainViewModel: ViewModel() {
             level = HttpLoggingInterceptor.Level.BODY
         })
         .addInterceptor { chain ->
+            TrafficStats.setThreadStatsTag(Thread.currentThread().getId().toInt())
             val request = chain.request().newBuilder()
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer 1234567890")
@@ -103,6 +105,8 @@ class MainViewModel: ViewModel() {
             val url = URL("https://reqres.in/api/users?page=2") // Will make separate network calls to the same URL
 
             launch(Dispatchers.IO) {
+
+                TrafficStats.setThreadStatsTag(Thread.currentThread().getId().toInt())
 
                 // • Method 0 (no status code checking, simplest)
                 val user0Json = url.readText()
@@ -166,7 +170,6 @@ class MainViewModel: ViewModel() {
                     val user3 = jsonDecodeLenientIgnoreUnknown.decodeFromString<UserProfileResponse>(userJson)
                     println("user 3: ${user3.data[3].firstName}")
                     _user3.value = user3.data[3]
-
                 } else {
                     println("Failure")
                 }
