@@ -19,6 +19,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.http.GET
+import java.lang.reflect.Method
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -106,8 +107,9 @@ class MainViewModel: ViewModel() {
 
             launch(Dispatchers.IO) {
 
-                TrafficStats.setThreadStatsTag(Thread.currentThread().getId().toInt())
+                TrafficStats.setThreadStatsTag(Thread.currentThread().getId().toInt()) // For strict mode warning
 
+                //////////////////////////////////////////////////////////////
                 // • Method 0 (no status code checking, simplest)
                 val user0Json = url.readText()
                 val dataUser0 = jsonDecodeLenientIgnoreUnknown.decodeFromString<UserProfileResponse>(user0Json)
@@ -115,6 +117,7 @@ class MainViewModel: ViewModel() {
                 _user0.value = dataUser0.data[0]
 
 
+                //////////////////////////////////////////////////////////////
                 // • Method 1 (no status code checking, has headers, uses streams)
                 val user1Stream = (url.openConnection() as HttpURLConnection).apply {
                         setRequestProperty("Authorization", "Development")
@@ -129,8 +132,8 @@ class MainViewModel: ViewModel() {
                     _user1.value = user1.data[1]
                 }
 
-
-//                // • Method 2 (no status code checking, has headers, uses simple .readText()) )
+//                ////////////////////////////////////////////////////////
+//                // • Method 2-Alt (same as below except with .disconnect() )
 //                val user2Json = (url.openConnection() as HttpURLConnection).let {
 //                    it.setRequestProperty("Authorization", "Development")
 //                    val json = url.readText(charset = Charsets.UTF_8)
@@ -138,6 +141,7 @@ class MainViewModel: ViewModel() {
 //                    json
 //                }
 
+                //////////////////////////////////////////////////////////////
                 // • Method 2 (no status code checking, has headers, uses simple .readText()) )
                 (url.openConnection() as HttpURLConnection).apply {
                     setRequestProperty("Authorization", "Development")
@@ -149,6 +153,7 @@ class MainViewModel: ViewModel() {
                 _user2.value = user2.data[2]
 
 
+                //////////////////////////////////////////////////////////////
                 // • Method 3 (status code checks, headers, can change request method, uses streams)
                 val http = (url.openConnection() as HttpURLConnection)
                 http.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
@@ -174,6 +179,8 @@ class MainViewModel: ViewModel() {
                     println("Failure")
                 }
 
+
+                //////////////////////////////////////////////////////////////
                 // • Retrofit method
                 val response = reqResApi.getUsers()
                 if (response.isSuccessful) {
